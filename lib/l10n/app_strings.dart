@@ -22,26 +22,26 @@ class S {
 
   String get modelLanguageHelp => switch (language) {
         AppLanguage.it =>
-          'Italiano usa Dante 2B e non legge le immagini. Inglese e cinese usano MiniCPM-V, che legge anche le foto. Le scritte dell\'app seguono la stessa lingua. Se il modello di quella lingua non è sul telefono, va scaricato. Se c\'è già una conversazione, cambiarla la azzera.',
+          'Italiano usa Gemma 3 1B e non legge le immagini. Inglese e cinese usano MiniCPM-V, che legge anche le foto. Le scritte dell\'app seguono la stessa lingua. Se il modello di quella lingua non è sul telefono, va scaricato. Se c\'è già una conversazione, cambiarla la azzera.',
         AppLanguage.en =>
-          'Italian uses Dante 2B and cannot read images. English and Chinese use MiniCPM-V, which can also read photos. The app text follows the same language. If that model is not on the phone yet, it has to be downloaded. If a conversation is already open, switching clears it.',
+          'Italian uses Gemma 3 1B and cannot read images. English and Chinese use MiniCPM-V, which can also read photos. The app text follows the same language. If that model is not on the phone yet, it has to be downloaded. If a conversation is already open, switching clears it.',
         AppLanguage.zh =>
-          '意大利语使用 Dante 2B，不能看图片。英语和中文使用 MiniCPM-V，也可以看照片。应用里的文字会跟着变。如果手机上还没有该模型，就需要下载。如果已经有对话，切换语言会清空对话。',
+          '意大利语使用 Gemma 3 1B，不能看图片。英语和中文使用 MiniCPM-V，也可以看照片。应用里的文字会跟着变。如果手机上还没有该模型，就需要下载。如果已经有对话，切换语言会清空对话。',
       };
 
   String languageOptionSubtitle(AppLanguage option) => switch (language) {
         AppLanguage.it => switch (option) {
-            AppLanguage.it => 'Dante 2B, solo testo, circa 1,2 GB',
+            AppLanguage.it => 'Gemma 3 1B, solo testo, circa 806 MB',
             AppLanguage.en => 'MiniCPM-V, testo e immagini, circa 1,6 GB',
             AppLanguage.zh => 'MiniCPM-V, testo e immagini, circa 1,6 GB',
           },
         AppLanguage.en => switch (option) {
-            AppLanguage.it => 'Dante 2B, text only, about 1.2 GB',
+            AppLanguage.it => 'Gemma 3 1B, text only, about 806 MB',
             AppLanguage.en => 'MiniCPM-V, text and images, about 1.6 GB',
             AppLanguage.zh => 'MiniCPM-V, text and images, about 1.6 GB',
           },
         AppLanguage.zh => switch (option) {
-            AppLanguage.it => 'Dante 2B，仅文字，约 1.2 GB',
+            AppLanguage.it => 'Gemma 3 1B，仅文字，约 806 MB',
             AppLanguage.en => 'MiniCPM-V，文字和图片，约 1.6 GB',
             AppLanguage.zh => 'MiniCPM-V，文字和图片，约 1.6 GB',
           },
@@ -104,7 +104,7 @@ class S {
       };
 
   String get deleteModelBody => switch (language) {
-        AppLanguage.it => 'Dovrai riscaricare circa 1,2 GB.',
+        AppLanguage.it => 'Dovrai riscaricare circa 806 MB.',
         AppLanguage.en => 'You will have to download 1.6 GB again.',
         AppLanguage.zh => '需要重新下载 1.6 GB。',
       };
@@ -122,14 +122,14 @@ class S {
       };
 
   String visionSubtitle(bool on) => switch (language) {
-        AppLanguage.it => 'Dante 2B • Solo testo',
+        AppLanguage.it => 'Gemma 3 1B • Solo testo',
         AppLanguage.en => on ? 'MiniCPM-V 4.6 • Vision ON' : 'MiniCPM-V 4.6 • Offline',
         AppLanguage.zh => on ? 'MiniCPM-V 4.6 • 视觉开启' : 'MiniCPM-V 4.6 • 离线',
       };
 
   String welcome({required bool vision}) {
     if (language == AppLanguage.it) {
-      return 'Ciao! Sono Dante 2B, offline sul telefono. Rispondo in italiano. Le immagini non sono disponibili in italiano.';
+      return 'Ciao! Sono Gemma 3, offline sul telefono. Rispondo in italiano. Le immagini non sono disponibili in italiano.';
     }
     final extra = vision ? visionReady : visionMissing;
     if (language == AppLanguage.en) {
@@ -241,13 +241,13 @@ class S {
       };
 
   String get tagline => switch (language) {
-        AppLanguage.it => 'Dante 2B  •  Offline •  Solo testo',
+        AppLanguage.it => 'Gemma 3 1B  •  Offline •  Solo testo',
         AppLanguage.en => 'MiniCPM-V 4.6  •  Offline •  Multimodal',
         AppLanguage.zh => 'MiniCPM-V 4.6  •  离线  •  多模态',
       };
 
   String get capabilities => switch (language) {
-        AppLanguage.it => 'Testo in italiano  •  ~1,2 GB',
+        AppLanguage.it => 'Testo in italiano  •  ~806 MB',
         AppLanguage.en => 'Images + text  •  Video (frames)  •  ~1.6 GB',
         AppLanguage.zh => '图片 + 文字  •  视频（帧）  •  约 1.6 GB',
       };
@@ -259,7 +259,7 @@ class S {
       };
 
   String get modelFileLabel => switch (language) {
-        AppLanguage.it => 'Dante 2B Q4_K_M (1,2 GB)',
+        AppLanguage.it => 'Gemma 3 1B Q4_K_M (806 MB)',
         AppLanguage.en => 'Q4_0 model (501 MB)',
         AppLanguage.zh => 'Q4_0 模型（501 MB）',
       };
@@ -332,11 +332,11 @@ class S {
     if (!vision) {
       return switch (language) {
         AppLanguage.it =>
-          'Modello: $modelPath\nPresente: $modelExists, $modelSizeMb MB\n\nSolo testo: Dante non ha il modulo visione.',
+          'Modello: $modelPath\nPresente: $modelExists, $modelSizeMb MB\n\nSolo testo: Gemma 3 non ha il modulo visione.',
         AppLanguage.en =>
-          'Model: $modelPath\nPresent: $modelExists, $modelSizeMb MB\n\nText only: Dante has no vision module.',
+          'Model: $modelPath\nPresent: $modelExists, $modelSizeMb MB\n\nText only: Gemma 3 has no vision module.',
         AppLanguage.zh =>
-          '模型：$modelPath\n已存在：$modelExists，$modelSizeMb MB\n\n仅文字：Dante 没有视觉模块。',
+          '模型：$modelPath\n已存在：$modelExists，$modelSizeMb MB\n\n仅文字：Gemma 3 没有视觉模块。',
       };
     }
     return switch (language) {
@@ -362,13 +362,13 @@ class S {
       };
 
   String get downloadingModel => switch (language) {
-        AppLanguage.it => 'Download Dante 2B (1,2 GB)...',
+        AppLanguage.it => 'Download Gemma 3 1B (806 MB)...',
         AppLanguage.en => 'Downloading Q4_0 model (501 MB)...',
         AppLanguage.zh => '正在下载 Q4_0 模型（501 MB）...',
       };
 
   String modelProgress(String received, String total) => switch (language) {
-        AppLanguage.it => 'Dante 2B: $received / $total MB',
+        AppLanguage.it => 'Gemma 3 1B: $received / $total MB',
         AppLanguage.en => 'Q4_0 model: $received / $total MB',
         AppLanguage.zh => 'Q4_0 模型：$received / $total MB',
       };
@@ -403,12 +403,6 @@ class S {
         AppLanguage.zh => '未找到模型：$path',
       };
 
-  String get preparingDante => switch (language) {
-        AppLanguage.it => 'Adatto Dante al telefono...',
-        AppLanguage.en => 'Preparing Dante for this phone...',
-        AppLanguage.zh => '正在让 Dante 适配这台手机...',
-      };
-
   String get startingEngine => switch (language) {
         AppLanguage.it => 'Inizializzazione engine llama.cpp...',
         AppLanguage.en => 'Starting llama.cpp engine...',
@@ -416,7 +410,7 @@ class S {
       };
 
   String get loadingModel => switch (language) {
-        AppLanguage.it => 'Caricamento Dante 2B...',
+        AppLanguage.it => 'Caricamento Gemma 3 1B...',
         AppLanguage.en => 'Loading Q4_0 model...',
         AppLanguage.zh => '正在加载 Q4_0 模型...',
       };
@@ -477,11 +471,11 @@ class S {
 
   String get pickLanguageHelp => switch (language) {
         AppLanguage.it =>
-          'Italiano scarica Dante 2B, solo testo. Inglese e cinese scaricano MiniCPM-V, che legge anche le immagini.',
+          'Italiano scarica Gemma 3 1B, solo testo. Inglese e cinese scaricano MiniCPM-V, che legge anche le immagini.',
         AppLanguage.en =>
-          'Italian downloads Dante 2B, text only. English and Chinese download MiniCPM-V, which can also read images.',
+          'Italian downloads Gemma 3 1B, text only. English and Chinese download MiniCPM-V, which can also read images.',
         AppLanguage.zh =>
-          '意大利语会下载 Dante 2B，仅文字。英语和中文会下载 MiniCPM-V，也可以看图片。',
+          '意大利语会下载 Gemma 3 1B，仅文字。英语和中文会下载 MiniCPM-V，也可以看图片。',
       };
 
   String get startDownload => switch (language) {

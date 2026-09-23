@@ -9,14 +9,14 @@ import '../l10n/app_strings.dart';
 import 'app_settings.dart';
 
 /// Due modelli, scelti dalla lingua prima del download.
-/// Italiano: Dante 2B, solo testo. Inglese e cinese: MiniCPM-V 4.6 + mmproj.
+/// Italiano: Gemma 3 1B, solo testo. Inglese e cinese: MiniCPM-V 4.6 + mmproj.
 class ModelManager {
-  static const String danteUrl =
-      'https://www.dropbox.com/scl/fi/pvda2zh4831rwlavs6mhy/dante-2b-ita-instruct-Q4_K_M.gguf?rlkey=t1dij8u00r33pzd3gur0s9moq&st=av5hzlnq&dl=1';
-  static const String danteFileName = 'dante-2b-ita-instruct-Q4_K_M.gguf';
-  // Dimensione reale del file su Dropbox (settembre 2026).
-  static const int danteExpectedBytes = 1289746592;
-  static const int danteMinBytes = danteExpectedBytes - 4 * 1024 * 1024;
+  static const String gemmaUrl =
+      'https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf';
+  static const String gemmaFileName = 'gemma-3-1b-it-Q4_K_M.gguf';
+  // Dimensione reale del file su Hugging Face (settembre 2026).
+  static const int gemmaExpectedBytes = 806058272;
+  static const int gemmaMinBytes = gemmaExpectedBytes - 4 * 1024 * 1024;
 
   static const String minicpmUrl =
       'https://huggingface.co/openbmb/MiniCPM-V-4.6-gguf/resolve/main/MiniCPM-V-4_6-Q4_0.gguf';
@@ -31,10 +31,11 @@ class ModelManager {
   static const int minicpmMinBytes = 400 * 1024 * 1024;
   static const int mmprojMinBytes = 1000 * 1024 * 1024;
 
-  /// Italiano usa Dante. Inglese e cinese usano MiniCPM-V, che ha la visione.
+  /// Italiano usa Gemma 3, solo testo. Inglese e cinese usano MiniCPM-V.
   bool get usesVision => AppSettings.instance.language != AppLanguage.it;
 
-  int get contextSize => usesVision ? 4096 : 2048;
+  // Gemma 3 1B arriva a 32k token. Sul telefono restiamo a 4096, come MiniCPM-V.
+  int get contextSize => 4096;
 
   Future<Directory> _getModelDir() async {
     final docs = await getApplicationDocumentsDirectory();
@@ -47,7 +48,7 @@ class ModelManager {
 
   Future<String> getModelPath() async {
     final dir = await _getModelDir();
-    final name = usesVision ? minicpmFileName : danteFileName;
+    final name = usesVision ? minicpmFileName : gemmaFileName;
     return p.join(dir.path, name);
   }
 
@@ -63,7 +64,7 @@ class ModelManager {
   }
 
   Future<bool> isModelExists() async {
-    final minBytes = usesVision ? minicpmMinBytes : danteMinBytes;
+    final minBytes = usesVision ? minicpmMinBytes : gemmaMinBytes;
     return _isFileReady(await getModelPath(), minBytes);
   }
 
@@ -71,7 +72,7 @@ class ModelManager {
     return _isFileReady(await getMmprojPath(), mmprojMinBytes);
   }
 
-  /// Pronto per la lingua attiva: Dante da solo, oppure MiniCPM-V più mmproj.
+  /// Pronto per la lingua attiva: Gemma 3 da sola, oppure MiniCPM-V più mmproj.
   Future<bool> isAllReady() async {
     if (!await isModelExists()) return false;
     if (!usesVision) return true;
@@ -161,7 +162,7 @@ class ModelManager {
 
   /// Scarica il modello della lingua attiva.
   /// onProgress: progress totale 0..1, messaggio, progress modello, progress mmproj.
-  /// Per Dante il progress della visione resta a 0: non viene scaricata.
+  /// Per Gemma 3 il progress della visione resta a 0: non viene scaricata.
   Future<void> downloadAll({
     required void Function(
       double totalProgress,
@@ -172,9 +173,9 @@ class ModelManager {
   }) async {
     final vision = usesVision;
     final modelPath = await getModelPath();
-    final modelUrl = vision ? minicpmUrl : danteUrl;
-    final modelExpected = vision ? minicpmExpectedBytes : danteExpectedBytes;
-    final modelMin = vision ? minicpmMinBytes : danteMinBytes;
+    final modelUrl = vision ? minicpmUrl : gemmaUrl;
+    final modelExpected = vision ? minicpmExpectedBytes : gemmaExpectedBytes;
+    final modelMin = vision ? minicpmMinBytes : gemmaMinBytes;
 
     double modelProg = await _isFileReady(modelPath, modelMin) ? 1.0 : 0.0;
     double mmprojProg = vision && !await isMmprojExists() ? 0.0 : 1.0;

@@ -5,8 +5,6 @@ import 'package:llamadart/llamadart.dart';
 import '../l10n/app_language.dart';
 import '../l10n/app_strings.dart';
 import 'app_settings.dart';
-import 'dante_gguf_compat.dart';
-import 'model_manager.dart';
 
 class ChatEngine {
   static final ChatEngine _instance = ChatEngine._internal();
@@ -24,7 +22,7 @@ class ChatEngine {
   bool get isLoading => _isLoading;
   String? get loadedModelPath => _loadedModelPath;
 
-  // Dante 2B è un instruct italiano: la regola va scritta in italiano.
+  // Gemma 3 1B Instruct segue la regola scritta in italiano.
   // MiniCPM-V 4.6 è addestrato su cinese e inglese, e segue la regola
   // solo se è scritta in inglese. Scriverla nella lingua di arrivo lo fa deragliare.
   static String systemPromptFor(AppLanguage language) => switch (language) {
@@ -75,17 +73,6 @@ class ChatEngine {
     penalty: 1.05,
   );
 
-  /// Dante chiude il turno con <|eot|>, che non è l'EOS del file.
-  static const GenerationParams danteParams = GenerationParams(
-    maxTokens: 1024,
-    temp: 0.7,
-    topK: 100,
-    topP: 0.8,
-    minP: 0.0,
-    penalty: 1.05,
-    stopSequences: ['<|eot|>', '<|end_of_text|>'],
-  );
-
   LlamaChatMessage get systemMessage => LlamaChatMessage.fromText(
         role: LlamaChatRole.system,
         text: systemPromptFor(AppSettings.instance.language),
@@ -126,11 +113,6 @@ class ChatEngine {
         throw Exception(S.current.modelMissing(modelPath));
       }
 
-      if (modelPath.endsWith(ModelManager.danteFileName)) {
-        onLog?.call(S.current.preparingDante);
-        await DanteGgufCompat.ensureLoadable(modelPath);
-      }
-
       onLog?.call(S.current.startingEngine);
       _engine = LlamaEngine(LlamaBackend());
 
@@ -139,7 +121,6 @@ class ChatEngine {
       await _engine!.loadModel(
         modelPath,
         modelParams: ModelParams(
-          // Dante è stato addestrato a 2048 token. MiniCPM-V resta a 4096.
           contextSize: contextSize,
           gpuLayers: 0, // CPU sicuro; imposta 99 per GPU se dispositivo supporta Vulkan
         ),
@@ -219,7 +200,6 @@ class ChatEngine {
       effectiveHistory = [systemMessage, ...history];
     }
     final messages = [...effectiveHistory, userMsg];
-    final effectiveParams = language == AppLanguage.it ? danteParams : params;
 
     // Il template di MiniCPM-V 4.6 Instruct apre <think> se enable_thinking
     // non è false. Il checkpoint Instruct non sa chiudere quel blocco e
@@ -227,7 +207,7 @@ class ChatEngine {
     // Cookbook ufficiale: reasoning off / enable_thinking false.
     await for (final chunk in _engine!.create(
       messages,
-      params: effectiveParams,
+      params: params,
       enableThinking: false,
     )) {
       final first = chunk.choices.isNotEmpty ? chunk.choices.first : null;

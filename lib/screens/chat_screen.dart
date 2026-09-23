@@ -58,7 +58,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   /// La lingua è cambiata. Inglese e cinese restano su MiniCPM-V e azzerano
-  /// solo la chat. Italiano carica Dante, e se i pesi non ci sono si torna
+  /// solo la chat. Italiano carica Gemma 3, e se i pesi non ci sono si torna
   /// al download.
   void _onLanguageChanged() {
     _applyLanguageChange();
