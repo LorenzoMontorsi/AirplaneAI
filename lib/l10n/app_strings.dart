@@ -403,6 +403,12 @@ class S {
         AppLanguage.zh => '未找到模型：$path',
       };
 
+  String get preparingDante => switch (language) {
+        AppLanguage.it => 'Adatto Dante al telefono...',
+        AppLanguage.en => 'Preparing Dante for this phone...',
+        AppLanguage.zh => '正在让 Dante 适配这台手机...',
+      };
+
   String get startingEngine => switch (language) {
         AppLanguage.it => 'Inizializzazione engine llama.cpp...',
         AppLanguage.en => 'Starting llama.cpp engine...',
