@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AirplaneAI — chat offline, a bordo del telefono</title>
+  <meta name="description" content="Chat multimodale offline per Android. MiniCPM-V 4.6 gira sul telefono: testo, immagini, italiano, inglese o cinese. Nessun cloud.">
+  <meta name="theme-color" content="#071018">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%23071018' width='32' height='32' rx='8'/%3E%3Cpath fill='%232ec4a5' d='M6 18h8l4 6 2-1-3-6h8l2 2h2l-2-5 2-5h-2l-2 2h-8l3-6-2-1-4 6H6z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@340;500;650&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <div class="horizon" id="horizon"></div>
+    <div class="runway"></div>
+    <div class="contrail"></div>
+  </div>
+
+  <header class="top">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 18h9l4.2 6.2 2.2-1.1-3.2-6.1h9.2l2.2 2.4h2.4l-2.6-5.4 2.6-5.4h-2.4l-2.2 2.4H16.2l3.2-6.1-2.2-1.1L13 14H4z"/></svg>
+      AirplaneAI
+    </a>
+    <div class="langs" role="group" aria-label="Lingua della pagina">
+      <button type="button" data-lang="it" aria-pressed="true">IT</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+    <a class="top-download" id="top-download" href="https://github.com/LorenzoMontorsi/AirplaneAI/releases/latest/download/AirplaneAI.apk">Scarica l'APK</a>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="kicker"><span class="pulse"></span><span data-i="kicker">Modalità aereo</span></p>
+        <h1 data-i="title">L'intelligenza resta a bordo.</h1>
+        <p class="lead" data-i="lead">Una chat che vede le foto e risponde senza uscire dal telefono. MiniCPM-V 4.6 vive sul dispositivo: italiano, inglese o cinese, anche con la rete staccata.</p>
+        <div class="actions">
+          <a class="btn" href="https://github.com/LorenzoMontorsi/AirplaneAI/releases/latest/download/AirplaneAI.apk">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+            <span data-i="download">Scarica l'APK</span>
+          </a>
+          <a class="btn ghost" href="https://github.com/LorenzoMontorsi/AirplaneAI">
+            <span data-i="source">Codice sorgente</span>
+          </a>
+        </div>
+        <p class="fine" data-i="fine">APK circa 257 MB. Il modello, circa 1,6 GB, si scarica al primo avvio e poi basta.</p>
+      </div>
+
+      <div class="deck">
+        <div class="instrument" aria-hidden="true">
+          <div class="bezel">
+            <div class="ball" id="ball"></div>
+            <div class="ticks"></div>
+            <div class="needle"></div>
+          </div>
+          <div class="readout">
+            <span>ALT</span>
+            <strong id="alt">410</strong>
+            <span>FT ×100</span>
+          </div>
+        </div>
+
+        <article class="phone" aria-label="Anteprima della chat">
+          <div class="statusbar">
+            <span>AirplaneAI</span>
+            <span class="air" title="Offline">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h7l3.2 4.6 1.7-.8-2.4-4.6H19l1.7 1.8H22l-2-4.2 2-4.2h-1.3L19 8.4h-6.5l2.4-4.6-1.7-.8L10 7.6H3z"/></svg>
+            </span>
+          </div>
+          <div class="thread" id="thread"></div>
+          <div class="composer">
+            <span data-i="hint">Messaggio + immagine...</span>
+            <i></i>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="facts" aria-label="In breve">
+      <article>
+        <b>0</b>
+        <span data-i="fact1">richieste al cloud, dopo il setup</span>
+      </article>
+      <article>
+        <b>4.6</b>
+        <span data-i="fact2">MiniCPM-V, quantizzato Q4_0</span>
+      </article>
+      <article>
+        <b>3</b>
+        <span data-i="fact3">lingue, modello e interfaccia</span>
+      </article>
+      <article>
+        <b>8+</b>
+        <span data-i="fact4">Android, arm64 e x86_64</span>
+      </article>
+    </section>
+
+    <section class="split">
+      <div>
+        <p class="kicker quiet" data-i="why-kicker">Perché esiste</p>
+        <h2 data-i="why-title">Una risposta che non chiede permesso alla rete.</h2>
+        <p data-i="why-body">In aereo, in galleria, in un posto senza campo: la chat è già nel telefono. Guarda una foto, legge il testo, risponde nella lingua che hai scelto. Il ragionamento interno del modello è spento, così non scivola nel cinese o nell'inglese a metà frase.</p>
+      </div>
+      <ol class="steps">
+        <li>
+          <span>01</span>
+          <div>
+            <strong data-i="s1t">Installa l'APK</strong>
+            <p data-i="s1b">Origini sconosciute abilitate. Non è sul Play Store.</p>
+          </div>
+        </li>
+        <li>
+          <span>02</span>
+          <div>
+            <strong data-i="s2t">Un solo download pesante</strong>
+            <p data-i="s2b">Circa 1,6 GB: i pesi e il modulo che guarda le immagini.</p>
+          </div>
+        </li>
+        <li>
+          <span>03</span>
+          <div>
+            <strong data-i="s3t">Stacca pure</strong>
+            <p data-i="s3b">Da lì in poi testo e foto restano sul dispositivo.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="cards">
+      <article>
+        <h3 data-i="c1t">Vede</h3>
+        <p data-i="c1b">Galleria o fotocamera. Se mandi solo l'immagine, la descrive nella lingua attiva.</p>
+      </article>
+      <article>
+        <h3 data-i="c2t">Parla la lingua scelta</h3>
+        <p data-i="c2b">Italiano, inglese o cinese. Cambiano le risposte e anche i menu. La preferenza resta salvata.</p>
+      </article>
+      <article>
+        <h3 data-i="c3t">Non fa il pendolare</h3>
+        <p data-i="c3b">Niente account, niente chiave API, niente conversazione che esce dal telefono.</p>
+      </article>
+    </section>
+
+    <section class="land">
+      <div>
+        <p class="kicker" data-i="land-kicker">In pista</p>
+        <h2 data-i="land-title">Prendila e mettila in tasca.</h2>
+      </div>
+      <a class="btn big" href="https://github.com/LorenzoMontorsi/AirplaneAI/releases/latest/download/AirplaneAI.apk">
+        <span data-i="download">Scarica l'APK</span>
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <span>AirplaneAI</span>
+    <a href="https://github.com/LorenzoMontorsi/AirplaneAI/releases/latest" data-i="release">Note di rilascio</a>
+    <a href="https://github.com/LorenzoMontorsi/AirplaneAI" data-i="source">Codice sorgente</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
