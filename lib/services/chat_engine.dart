@@ -14,25 +14,27 @@ class ChatEngine {
   LlamaEngine? _engine;
   bool _isLoading = false;
   bool _isLoaded = false;
+  bool _visionReady = false;
   String? _loadedModelPath;
   String? _loadedMmprojPath;
 
   bool get isLoaded => _isLoaded;
   bool get isLoading => _isLoading;
+  String? get loadedModelPath => _loadedModelPath;
 
-  // MiniCPM-V 4.6 Instruct è Qwen3.5-0.8B, addestrato su cinese e inglese.
-  // La regola di lingua va scritta in inglese: è la lingua di istruzione che
-  // il modello segue. Scriverla solo nella lingua di arrivo lo fa deragliare.
+  // Dante 2B è un instruct italiano: la regola va scritta in italiano.
+  // MiniCPM-V 4.6 è addestrato su cinese e inglese, e segue la regola
+  // solo se è scritta in inglese. Scriverla nella lingua di arrivo lo fa deragliare.
   static String systemPromptFor(AppLanguage language) => switch (language) {
         AppLanguage.it =>
-          'You are AirplaneAI. Answer in Italian only. '
-          'Use correct, simple Italian. '
-          'Do not use Chinese characters. Do not answer in English, '
-          'except for names, code, or a word the user asked to keep. '
-          'Do not mix languages in the same answer. '
-          'If the user writes in another language, still answer in Italian, '
-          'unless they explicitly ask you to translate or to use another language. '
-          'Be concise and friendly. Describe images in Italian.',
+          'Sei AirplaneAI. Rispondi solo in italiano. '
+          'Usa un italiano corretto e semplice. '
+          'Non usare caratteri cinesi. Non rispondere in inglese, '
+          'tranne per nomi, codice o una parola che l\'utente chiede di lasciare così. '
+          'Non mescolare le lingue nella stessa risposta. '
+          'Se l\'utente scrive in un\'altra lingua, rispondi comunque in italiano, '
+          'a meno che non chieda esplicitamente di tradurre o di usare un\'altra lingua. '
+          'Sii conciso e cordiale.',
         AppLanguage.en =>
           'You are AirplaneAI. Answer in English only. '
           'Use correct, simple English. '
@@ -87,7 +89,8 @@ class ChatEngine {
 
   Future<void> init({
     required String modelPath,
-    required String mmprojPath,
+    String? mmprojPath,
+    int contextSize = 4096,
     void Function(String msg)? onLog,
   }) async {
     if (_isLoading) return;
@@ -103,6 +106,7 @@ class ChatEngine {
         try { await _engine!.dispose(); } catch (_) {}
         _engine = null;
       }
+      _visionReady = false;
 
       final modelFile = File(modelPath);
       if (!await modelFile.exists()) {
@@ -116,23 +120,25 @@ class ChatEngine {
       // Usa ModelParams per contesto e gpu
       await _engine!.loadModel(
         modelPath,
-        modelParams: const ModelParams(
-          contextSize: 4096,
+        modelParams: ModelParams(
+          // Dante è stato addestrato a 2048 token. MiniCPM-V resta a 4096.
+          contextSize: contextSize,
           gpuLayers: 0, // CPU sicuro; imposta 99 per GPU se dispositivo supporta Vulkan
         ),
       );
       onLog?.call(S.current.modelLoaded);
 
-      final mmprojFile = File(mmprojPath);
-      if (await mmprojFile.exists()) {
+      final projector = mmprojPath;
+      if (projector != null && await File(projector).exists()) {
         try {
           onLog?.call(S.current.loadingVision);
-          await _engine!.loadMultimodalProjector(mmprojPath);
+          await _engine!.loadMultimodalProjector(projector);
+          _visionReady = true;
           onLog?.call(S.current.visionEnabled);
         } catch (e) {
           onLog?.call(S.current.visionLoadWarning(e));
         }
-      } else {
+      } else if (projector != null) {
         onLog?.call(S.current.visionFileMissing);
       }
 
@@ -141,6 +147,7 @@ class ChatEngine {
       _loadedMmprojPath = mmprojPath;
     } catch (e, st) {
       _isLoaded = false;
+      _visionReady = false;
       onLog?.call(S.current.loadFailed(e));
       print('ChatEngine init error: $e\n$st');
       rethrow;
@@ -162,7 +169,7 @@ class ChatEngine {
 
     final List<LlamaContentPart> content = [];
     final image = imagePath;
-    if (image != null && image.isNotEmpty) {
+    if (_visionReady && image != null && image.isNotEmpty) {
       final f = File(image);
       if (await f.exists()) {
         content.add(LlamaImageContent(path: image));
@@ -228,5 +235,6 @@ class ChatEngine {
     }
     _isLoaded = false;
     _isLoading = false;
+    _visionReady = false;
   }
 }

@@ -22,28 +22,28 @@ class S {
 
   String get modelLanguageHelp => switch (language) {
         AppLanguage.it =>
-          'Il modello risponde solo nella lingua scelta. Le scritte dell\'app seguono la stessa lingua. Se c\'è già una conversazione, cambiarla la azzera: altrimenti il modello continua a mescolare le lingue.',
+          'Italiano usa Dante 2B e non legge le immagini. Inglese e cinese usano MiniCPM-V, che legge anche le foto. Le scritte dell\'app seguono la stessa lingua. Se il modello di quella lingua non è sul telefono, va scaricato. Se c\'è già una conversazione, cambiarla la azzera.',
         AppLanguage.en =>
-          'The model replies only in the selected language. The app text follows the same language. If a conversation is already open, switching clears it, so the model does not keep mixing languages.',
+          'Italian uses Dante 2B and cannot read images. English and Chinese use MiniCPM-V, which can also read photos. The app text follows the same language. If that model is not on the phone yet, it has to be downloaded. If a conversation is already open, switching clears it.',
         AppLanguage.zh =>
-          '模型只会用所选语言回答，应用里的文字也会跟着变。如果已经有对话，切换语言会清空对话，避免模型混用语言。',
+          '意大利语使用 Dante 2B，不能看图片。英语和中文使用 MiniCPM-V，也可以看照片。应用里的文字会跟着变。如果手机上还没有该模型，就需要下载。如果已经有对话，切换语言会清空对话。',
       };
 
   String languageOptionSubtitle(AppLanguage option) => switch (language) {
         AppLanguage.it => switch (option) {
-            AppLanguage.it => 'Risposte e interfaccia in italiano',
-            AppLanguage.en => 'Risposte e interfaccia in inglese',
-            AppLanguage.zh => 'Risposte e interfaccia in cinese',
+            AppLanguage.it => 'Dante 2B, solo testo, circa 1,2 GB',
+            AppLanguage.en => 'MiniCPM-V, testo e immagini, circa 1,6 GB',
+            AppLanguage.zh => 'MiniCPM-V, testo e immagini, circa 1,6 GB',
           },
         AppLanguage.en => switch (option) {
-            AppLanguage.it => 'Replies and interface in Italian',
-            AppLanguage.en => 'Replies and interface in English',
-            AppLanguage.zh => 'Replies and interface in Chinese',
+            AppLanguage.it => 'Dante 2B, text only, about 1.2 GB',
+            AppLanguage.en => 'MiniCPM-V, text and images, about 1.6 GB',
+            AppLanguage.zh => 'MiniCPM-V, text and images, about 1.6 GB',
           },
         AppLanguage.zh => switch (option) {
-            AppLanguage.it => '回复和界面使用意大利语',
-            AppLanguage.en => '回复和界面使用英语',
-            AppLanguage.zh => '回复和界面使用中文',
+            AppLanguage.it => 'Dante 2B，仅文字，约 1.2 GB',
+            AppLanguage.en => 'MiniCPM-V，文字和图片，约 1.6 GB',
+            AppLanguage.zh => 'MiniCPM-V，文字和图片，约 1.6 GB',
           },
       };
 
@@ -55,10 +55,10 @@ class S {
 
   String get changeLanguageBody => switch (language) {
         AppLanguage.it =>
-          'La chat attuale viene cancellata, così il modello non mescola le lingue.',
+          'La chat attuale viene cancellata. Se il modello di questa lingua non è ancora sul telefono, parte il download.',
         AppLanguage.en =>
-          'The current chat will be cleared so the model does not mix languages.',
-        AppLanguage.zh => '当前对话会被清空，以免模型混用语言。',
+          'The current chat will be cleared. If this language\'s model is not on the phone yet, the download starts.',
+        AppLanguage.zh => '当前对话会被清空。如果手机上还没有这种语言的模型，就会开始下载。',
       };
 
   String get change => switch (language) {
@@ -104,7 +104,7 @@ class S {
       };
 
   String get deleteModelBody => switch (language) {
-        AppLanguage.it => 'Dovrai riscaricare 1.6 GB.',
+        AppLanguage.it => 'Dovrai riscaricare circa 1,2 GB.',
         AppLanguage.en => 'You will have to download 1.6 GB again.',
         AppLanguage.zh => '需要重新下载 1.6 GB。',
       };
@@ -122,20 +122,20 @@ class S {
       };
 
   String visionSubtitle(bool on) => switch (language) {
-        AppLanguage.it => on ? 'MiniCPM-V 4.6 • Visione ON' : 'MiniCPM-V 4.6 • Offline',
+        AppLanguage.it => 'Dante 2B • Solo testo',
         AppLanguage.en => on ? 'MiniCPM-V 4.6 • Vision ON' : 'MiniCPM-V 4.6 • Offline',
         AppLanguage.zh => on ? 'MiniCPM-V 4.6 • 视觉开启' : 'MiniCPM-V 4.6 • 离线',
       };
 
   String welcome({required bool vision}) {
+    if (language == AppLanguage.it) {
+      return 'Ciao! Sono Dante 2B, offline sul telefono. Rispondo in italiano. Le immagini non sono disponibili in italiano.';
+    }
     final extra = vision ? visionReady : visionMissing;
-    return switch (language) {
-      AppLanguage.it =>
-        'Ciao! Sono MiniCPM-V 4.6 offline. Rispondo in italiano. $extra',
-      AppLanguage.en =>
-        'Hi! I am MiniCPM-V 4.6 offline. I reply in English. $extra',
-      AppLanguage.zh => '你好！我是离线的 MiniCPM-V 4.6。我会用中文回答。$extra',
-    };
+    if (language == AppLanguage.en) {
+      return 'Hi! I am MiniCPM-V 4.6 offline. I reply in English. $extra';
+    }
+    return '你好！我是离线的 MiniCPM-V 4.6。我会用中文回答。$extra';
   }
 
   String get visionReady => switch (language) {
@@ -241,13 +241,13 @@ class S {
       };
 
   String get tagline => switch (language) {
-        AppLanguage.it => 'MiniCPM-V 4.6  •  Offline •  Multimodale',
+        AppLanguage.it => 'Dante 2B  •  Offline •  Solo testo',
         AppLanguage.en => 'MiniCPM-V 4.6  •  Offline •  Multimodal',
         AppLanguage.zh => 'MiniCPM-V 4.6  •  离线  •  多模态',
       };
 
   String get capabilities => switch (language) {
-        AppLanguage.it => 'Immagini + Testo  •  Video (frame)  •  ~1.6 GB',
+        AppLanguage.it => 'Testo in italiano  •  ~1,2 GB',
         AppLanguage.en => 'Images + text  •  Video (frames)  •  ~1.6 GB',
         AppLanguage.zh => '图片 + 文字  •  视频（帧）  •  约 1.6 GB',
       };
@@ -259,7 +259,7 @@ class S {
       };
 
   String get modelFileLabel => switch (language) {
-        AppLanguage.it => 'Modello Q4_0 (501 MB)',
+        AppLanguage.it => 'Dante 2B Q4_K_M (1,2 GB)',
         AppLanguage.en => 'Q4_0 model (501 MB)',
         AppLanguage.zh => 'Q4_0 模型（501 MB）',
       };
@@ -327,15 +327,27 @@ class S {
     required String mmprojPath,
     required bool mmprojExists,
     required String mmprojSizeMb,
-  }) =>
-      switch (language) {
+    required bool vision,
+  }) {
+    if (!vision) {
+      return switch (language) {
         AppLanguage.it =>
-          'Modello: $modelPath\nPresente: $modelExists, $modelSizeMb MB\n\nVisione: $mmprojPath\nPresente: $mmprojExists, $mmprojSizeMb MB',
+          'Modello: $modelPath\nPresente: $modelExists, $modelSizeMb MB\n\nSolo testo: Dante non ha il modulo visione.',
         AppLanguage.en =>
-          'Model: $modelPath\nPresent: $modelExists, $modelSizeMb MB\n\nVision: $mmprojPath\nPresent: $mmprojExists, $mmprojSizeMb MB',
+          'Model: $modelPath\nPresent: $modelExists, $modelSizeMb MB\n\nText only: Dante has no vision module.',
         AppLanguage.zh =>
-          '模型：$modelPath\n已存在：$modelExists，$modelSizeMb MB\n\n视觉：$mmprojPath\n已存在：$mmprojExists，$mmprojSizeMb MB',
+          '模型：$modelPath\n已存在：$modelExists，$modelSizeMb MB\n\n仅文字：Dante 没有视觉模块。',
       };
+    }
+    return switch (language) {
+      AppLanguage.it =>
+        'Modello: $modelPath\nPresente: $modelExists, $modelSizeMb MB\n\nVisione: $mmprojPath\nPresente: $mmprojExists, $mmprojSizeMb MB',
+      AppLanguage.en =>
+        'Model: $modelPath\nPresent: $modelExists, $modelSizeMb MB\n\nVision: $mmprojPath\nPresent: $mmprojExists, $mmprojSizeMb MB',
+      AppLanguage.zh =>
+        '模型：$modelPath\n已存在：$modelExists，$modelSizeMb MB\n\n视觉：$mmprojPath\n已存在：$mmprojExists，$mmprojSizeMb MB',
+    };
+  }
 
   String downloadFailed(int code) => switch (language) {
         AppLanguage.it => 'Download fallito (HTTP $code)',
@@ -350,13 +362,13 @@ class S {
       };
 
   String get downloadingModel => switch (language) {
-        AppLanguage.it => 'Download modello Q4_0 (501 MB)...',
+        AppLanguage.it => 'Download Dante 2B (1,2 GB)...',
         AppLanguage.en => 'Downloading Q4_0 model (501 MB)...',
         AppLanguage.zh => '正在下载 Q4_0 模型（501 MB）...',
       };
 
   String modelProgress(String received, String total) => switch (language) {
-        AppLanguage.it => 'Modello Q4_0: $received / $total MB',
+        AppLanguage.it => 'Dante 2B: $received / $total MB',
         AppLanguage.en => 'Q4_0 model: $received / $total MB',
         AppLanguage.zh => 'Q4_0 模型：$received / $total MB',
       };
@@ -398,7 +410,7 @@ class S {
       };
 
   String get loadingModel => switch (language) {
-        AppLanguage.it => 'Caricamento modello Q4_0...',
+        AppLanguage.it => 'Caricamento Dante 2B...',
         AppLanguage.en => 'Loading Q4_0 model...',
         AppLanguage.zh => '正在加载 Q4_0 模型...',
       };
@@ -449,5 +461,32 @@ class S {
         AppLanguage.it => 'Messaggio vuoto',
         AppLanguage.en => 'Empty message',
         AppLanguage.zh => '消息为空',
+      };
+
+  String get pickLanguageTitle => switch (language) {
+        AppLanguage.it => 'Prima del download',
+        AppLanguage.en => 'Before the download',
+        AppLanguage.zh => '下载之前',
+      };
+
+  String get pickLanguageHelp => switch (language) {
+        AppLanguage.it =>
+          'Italiano scarica Dante 2B, solo testo. Inglese e cinese scaricano MiniCPM-V, che legge anche le immagini.',
+        AppLanguage.en =>
+          'Italian downloads Dante 2B, text only. English and Chinese download MiniCPM-V, which can also read images.',
+        AppLanguage.zh =>
+          '意大利语会下载 Dante 2B，仅文字。英语和中文会下载 MiniCPM-V，也可以看图片。',
+      };
+
+  String get startDownload => switch (language) {
+        AppLanguage.it => 'Scarica',
+        AppLanguage.en => 'Download',
+        AppLanguage.zh => '下载',
+      };
+
+  String get continueChat => switch (language) {
+        AppLanguage.it => 'Continua',
+        AppLanguage.en => 'Continue',
+        AppLanguage.zh => '继续',
       };
 }

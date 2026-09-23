@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_language.dart';
 import '../l10n/app_strings.dart';
 import '../services/app_settings.dart';
 import '../services/model_manager.dart';
@@ -19,13 +20,14 @@ class _DownloadScreenState extends State<DownloadScreen> {
   String _status = S.current.checkingModel;
   bool _downloading = false;
   bool _error = false;
+  bool _targetReady = false;
   String _errorMsg = '';
 
   @override
   void initState() {
     super.initState();
     AppSettings.instance.addListener(_onLanguage);
-    _checkAndDownload();
+    _refreshTarget();
   }
 
   @override
@@ -35,23 +37,29 @@ class _DownloadScreenState extends State<DownloadScreen> {
   }
 
   void _onLanguage() {
-    if (mounted) setState(() {});
+    if (!mounted || _downloading) return;
+    setState(() {});
+    _refreshTarget();
   }
 
-  Future<void> _checkAndDownload() async {
+  Future<void> _refreshTarget() async {
     final ready = await _mgr.isAllReady();
-    if (ready) {
-      _status = S.current.modelAlreadyPresent;
-      setState(() {
-        _total = 1;
-        _modelProg = 1;
-        _mmprojProg = 1;
-      });
-      await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted || _downloading) return;
+    setState(() => _targetReady = ready);
+  }
+
+  Future<void> _selectLanguage(AppLanguage language) async {
+    if (_downloading) return;
+    await AppSettings.instance.setLanguage(language);
+  }
+
+  Future<void> _confirmAndDownload() async {
+    if (_downloading) return;
+    if (await _mgr.isAllReady()) {
       widget.onReady();
       return;
     }
-    _startDownload();
+    await _startDownload();
   }
 
   Future<void> _startDownload() async {
@@ -92,12 +100,10 @@ class _DownloadScreenState extends State<DownloadScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF0B1D26),
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
                 const Icon(Icons.smart_toy, size: 72, color: Color(0xFF2EC4A5)),
                 const SizedBox(height: 16),
                 const Text('AirplaneAI', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
@@ -109,21 +115,33 @@ class _DownloadScreenState extends State<DownloadScreen> {
                   decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(20)),
                   child: Text(s.capabilities, style: const TextStyle(color: Colors.white70, fontSize: 11)),
                 ),
-                const SizedBox(height: 36),
-                // Totale
-                Align(alignment: Alignment.centerLeft, child: Text(_status, style: const TextStyle(color: Colors.white, fontSize: 14), textAlign: TextAlign.left)),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(value: _total, minHeight: 10, backgroundColor: Colors.white10, valueColor: const AlwaysStoppedAnimation(Color(0xFF2EC4A5))),
+                const SizedBox(height: 28),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(s.pickLanguageTitle, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
                 const SizedBox(height: 6),
-                Text('${(_total * 100).toStringAsFixed(1)} %  ${s.total}', style: const TextStyle(color: Colors.white60, fontSize: 12)),
-                const SizedBox(height: 20),
-                _buildDetail(s.modelFileLabel, _modelProg),
-                const SizedBox(height: 10),
-                _buildDetail(s.visionFileLabel, _mmprojProg),
-                const SizedBox(height: 30),
+                Text(s.pickLanguageHelp, style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.35)),
+                const SizedBox(height: 12),
+                _languagePicker(s),
+                const SizedBox(height: 24),
+                if (_downloading || _error) ...[
+                  Align(alignment: Alignment.centerLeft, child: Text(_status, style: const TextStyle(color: Colors.white, fontSize: 14), textAlign: TextAlign.left)),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(value: _total, minHeight: 10, backgroundColor: Colors.white10, valueColor: const AlwaysStoppedAnimation(Color(0xFF2EC4A5))),
+                  ),
+                  const SizedBox(height: 6),
+                  Text('${(_total * 100).toStringAsFixed(1)} %  ${s.total}', style: const TextStyle(color: Colors.white60, fontSize: 12)),
+                  const SizedBox(height: 20),
+                  _buildDetail(s.modelFileLabel, _modelProg),
+                  if (_mgr.usesVision) ...[
+                    const SizedBox(height: 10),
+                    _buildDetail(s.visionFileLabel, _mmprojProg),
+                  ],
+                  const SizedBox(height: 30),
+                ],
                 if (_error) ...[
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -138,7 +156,19 @@ class _DownloadScreenState extends State<DownloadScreen> {
                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2EC4A5), foregroundColor: Colors.white),
                   ),
                 ] else if (_downloading)
-                  Text(s.downloadWarning, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                  Text(s.downloadWarning, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 12))
+                else ...[
+                  ElevatedButton.icon(
+                    onPressed: _confirmAndDownload,
+                    icon: Icon(_targetReady ? Icons.arrow_forward : Icons.download),
+                    label: Text(_targetReady ? s.continueChat : s.startDownload),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2EC4A5), foregroundColor: Colors.white),
+                  ),
+                  if (!_targetReady) ...[
+                    const SizedBox(height: 16),
+                    Text(s.downloadWarning, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                  ],
+                ],
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () async {
@@ -154,6 +184,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
                         mmprojPath: '${s['mmprojPath']}',
                         mmprojExists: s['mmprojExists'] == true,
                         mmprojSizeMb: ((s['mmprojSize'] as int) / 1024 / 1024).toStringAsFixed(1),
+                        vision: s['usesVision'] == true,
                       )),
                       actions: [TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(strings.ok))],
                     ));
@@ -163,6 +194,41 @@ class _DownloadScreenState extends State<DownloadScreen> {
               ],
             ),
           ),
+        ),
+    );
+  }
+
+  Widget _languagePicker(S s) {
+    final selected = AppSettings.instance.language;
+    return Material(
+      color: Colors.white10,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: RadioGroup<AppLanguage>(
+        groupValue: selected,
+        onChanged: _downloading
+            ? (_) {}
+            : (value) {
+                if (value != null) _selectLanguage(value);
+              },
+        child: Column(
+          children: [
+            for (var i = 0; i < AppLanguage.values.length; i++) ...[
+              if (i > 0) const Divider(height: 1, color: Colors.white12),
+              RadioListTile<AppLanguage>(
+                value: AppLanguage.values[i],
+                activeColor: const Color(0xFF2EC4A5),
+                title: Text(
+                  AppLanguage.values[i].nativeName,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  s.languageOptionSubtitle(AppLanguage.values[i]),
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

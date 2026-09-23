@@ -17,7 +17,10 @@ class ChatMessageUI {
 }
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  /// La lingua attiva non ha ancora i pesi sul telefono.
+  final VoidCallback onModelMissing;
+
+  const ChatScreen({super.key, required this.onModelMissing});
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
@@ -34,6 +37,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool _isGenerating = false;
   bool _isInitializing = true;
+  bool _applyingLanguage = false;
   String _initLog = S.current.initializing;
   String? _pendingImagePath;
   bool _visionEnabled = false;
@@ -53,34 +57,70 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  /// La lingua è cambiata: le scritte si aggiornano da sole, ma la history del
-  /// modello va azzerata, altrimenti le risposte vecchie lo ritirano indietro.
+  /// La lingua è cambiata. Inglese e cinese restano su MiniCPM-V e azzerano
+  /// solo la chat. Italiano carica Dante, e se i pesi non ci sono si torna
+  /// al download.
   void _onLanguageChanged() {
-    if (!mounted) return;
-    if (_isInitializing) {
-      setState(() {});
-      return;
+    _applyLanguageChange();
+  }
+
+  Future<void> _applyLanguageChange() async {
+    if (!mounted || _applyingLanguage) return;
+    _applyingLanguage = true;
+    try {
+      if (_isInitializing) {
+        if (mounted) setState(() {});
+        return;
+      }
+      final ready = await _modelMgr.isAllReady();
+      if (!mounted) return;
+      if (!ready) {
+        final nav = Navigator.of(context);
+        if (nav.canPop()) nav.pop();
+        widget.onModelMissing();
+        return;
+      }
+      final modelPath = await _modelMgr.getModelPath();
+      if (!mounted) return;
+      if (!_engine.isLoaded || _engine.loadedModelPath != modelPath) {
+        setState(() {
+          _uiMessages.clear();
+          _pendingImagePath = null;
+        });
+        await _initEngine();
+        return;
+      }
+      _resetConversation(S.current.welcome(vision: _visionEnabled));
+    } finally {
+      _applyingLanguage = false;
     }
-    _resetConversation(S.current.welcome(vision: _visionEnabled));
   }
 
   Future<void> _initEngine() async {
     setState(() { _isInitializing = true; _initLog = S.current.checkingModel; });
+    final vision = _modelMgr.usesVision;
     final modelPath = await _modelMgr.getModelPath();
-    final mmprojPath = await _modelMgr.getMmprojPath();
+    final mmprojPath = vision ? await _modelMgr.getMmprojPath() : null;
     try {
-      await _engine.init(modelPath: modelPath, mmprojPath: mmprojPath, onLog: (m) {
-        setState(() => _initLog = m);
-      });
-      final vision = await _engine.supportsVision;
+      await _engine.init(
+        modelPath: modelPath,
+        mmprojPath: mmprojPath,
+        contextSize: _modelMgr.contextSize,
+        onLog: (m) {
+          if (mounted) setState(() => _initLog = m);
+        },
+      );
+      final visionOn = await _engine.supportsVision;
+      if (!mounted) return;
       setState(() {
-        _visionEnabled = vision;
+        _visionEnabled = visionOn;
         _isInitializing = false;
       });
       _llamaHistory.clear();
       _llamaHistory.add(_engine.systemMessage);
       _addSystem(S.current.welcome(vision: _visionEnabled));
     } catch (e) {
+      if (!mounted) return;
       setState(() { _isInitializing = false; _initLog = '${S.current.initFailedShort}: $e'; });
       _addSystem(S.current.initFailed(e));
     }

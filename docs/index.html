@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AirplaneAI — chat offline, a bordo del telefono</title>
-  <meta name="description" content="Chat multimodale offline per Android. MiniCPM-V 4.6 gira sul telefono: testo, immagini, italiano, inglese o cinese. Nessun cloud.">
+  <meta name="description" content="Chat offline per Android. In italiano Dante 2B, solo testo. In inglese e cinese MiniCPM-V 4.6, anche le immagini. Nessun cloud.">
   <meta name="theme-color" content="#071018">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%23071018' width='32' height='32' rx='8'/%3E%3Cpath fill='%232ec4a5' d='M6 18h8l4 6 2-1-3-6h8l2 2h2l-2-5 2-5h-2l-2 2h-8l3-6-2-1-4 6H6z'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,7 +37,7 @@
       <div class="hero-copy">
         <p class="kicker"><span class="pulse"></span><span data-i="kicker">Modalità aereo</span></p>
         <h1 data-i="title">L'intelligenza resta a bordo.</h1>
-        <p class="lead" data-i="lead">Una chat che vede le foto e risponde senza uscire dal telefono. MiniCPM-V 4.6 vive sul dispositivo: italiano, inglese o cinese, anche con la rete staccata.</p>
+        <p class="lead" data-i="lead">Una chat che risponde senza uscire dal telefono. In italiano c'è Dante 2B, solo testo. In inglese e in cinese c'è MiniCPM-V 4.6, che guarda anche le foto. Anche con la rete staccata.</p>
         <div class="actions">
           <a class="btn" href="https://github.com/LorenzoMontorsi/AirplaneAI/releases/latest/download/AirplaneAI.apk">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
@@ -47,7 +47,7 @@
             <span data-i="source">Codice sorgente</span>
           </a>
         </div>
-        <p class="fine" data-i="fine">APK circa 257 MB. Il modello, circa 1,6 GB, si scarica al primo avvio e poi basta.</p>
+        <p class="fine" data-i="fine">APK circa 257 MB. La lingua si sceglie prima del download: Dante, circa 1,2 GB, oppure MiniCPM-V, circa 1,6 GB.</p>
       </div>
 
       <div class="deck">
@@ -73,7 +73,7 @@
           </div>
           <div class="thread" id="thread"></div>
           <div class="composer">
-            <span data-i="hint">Messaggio + immagine...</span>
+            <span data-i="hint">Messaggio...</span>
             <i></i>
           </div>
         </article>
@@ -86,8 +86,8 @@
         <span data-i="fact1">richieste al cloud, dopo il setup</span>
       </article>
       <article>
-        <b>4.6</b>
-        <span data-i="fact2">MiniCPM-V, quantizzato Q4_0</span>
+        <b>2</b>
+        <span data-i="fact2">Dante in italiano, MiniCPM-V in inglese e cinese</span>
       </article>
       <article>
         <b>3</b>
@@ -103,7 +103,7 @@
       <div>
         <p class="kicker quiet" data-i="why-kicker">Perché esiste</p>
         <h2 data-i="why-title">Una risposta che non chiede permesso alla rete.</h2>
-        <p data-i="why-body">In aereo, in galleria, in un posto senza campo: la chat è già nel telefono. Guarda una foto, legge il testo, risponde nella lingua che hai scelto. Il ragionamento interno del modello è spento, così non scivola nel cinese o nell'inglese a metà frase.</p>
+        <p data-i="why-body">In aereo, in galleria, in un posto senza campo: la chat è già nel telefono. In italiano risponde Dante. In inglese e in cinese MiniCPM-V guarda anche la foto. Il ragionamento interno di MiniCPM-V è spento, così non scivola in un'altra lingua a metà frase.</p>
       </div>
       <ol class="steps">
         <li>
@@ -117,7 +117,7 @@
           <span>02</span>
           <div>
             <strong data-i="s2t">Un solo download pesante</strong>
-            <p data-i="s2b">Circa 1,6 GB: i pesi e il modulo che guarda le immagini.</p>
+            <p data-i="s2b">Italiano: Dante 2B, circa 1,2 GB, solo testo. Inglese o cinese: MiniCPM-V, circa 1,6 GB, con le immagini.</p>
           </div>
         </li>
         <li>
@@ -133,11 +133,11 @@
     <section class="cards">
       <article>
         <h3 data-i="c1t">Vede</h3>
-        <p data-i="c1b">Galleria o fotocamera. Se mandi solo l'immagine, la descrive nella lingua attiva.</p>
+        <p data-i="c1b">Galleria o fotocamera, in inglese e in cinese. In italiano Dante è solo testo.</p>
       </article>
       <article>
         <h3 data-i="c2t">Parla la lingua scelta</h3>
-        <p data-i="c2b">Italiano, inglese o cinese. Cambiano le risposte e anche i menu. La preferenza resta salvata.</p>
+        <p data-i="c2b">Italiano, inglese o cinese. La scelta, prima del download, decide il modello. Resta salvata.</p>
       </article>
       <article>
         <h3 data-i="c3t">Non fa il pendolare</h3>

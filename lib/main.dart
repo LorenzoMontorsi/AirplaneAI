@@ -60,7 +60,9 @@ class _BootstrapState extends State<Bootstrap> {
       );
     }
     if (_ready) {
-      return const ChatScreen();
+      return ChatScreen(onModelMissing: () {
+        setState(() => _ready = false);
+      });
     }
     return DownloadScreen(onReady: () {
       setState(() => _ready = true);
