@@ -19,6 +19,10 @@ class AppSettings extends ChangeNotifier {
 
   AppLanguage language = AppLanguage.it;
 
+  /// Ricerca online facoltativa dal feed RSS personale. Spenta di default:
+  /// l'app resta offline, se accesa aggiunge contesto dalle ultime 24h.
+  bool onlineSearch = false;
+
   Future<void> load() async {
     try {
       final file = await _file();
@@ -27,8 +31,21 @@ class AppSettings extends ChangeNotifier {
       if (raw is Map && raw['language'] is String) {
         language = AppLanguage.fromCode(raw['language'] as String);
       }
+      if (raw is Map && raw['onlineSearch'] is bool) {
+        onlineSearch = raw['onlineSearch'] as bool;
+      }
     } catch (e) {
       debugPrint('AppSettings load: $e');
+    }
+  }
+
+  Future<void> _save() async {
+    try {
+      final file = await _file();
+      await file.writeAsString(
+          jsonEncode({'language': language.code, 'onlineSearch': onlineSearch}));
+    } catch (e) {
+      debugPrint('AppSettings save: $e');
     }
   }
 
@@ -36,12 +53,14 @@ class AppSettings extends ChangeNotifier {
     if (value == language) return;
     language = value;
     notifyListeners();
-    try {
-      final file = await _file();
-      await file.writeAsString(jsonEncode({'language': value.code}));
-    } catch (e) {
-      debugPrint('AppSettings save: $e');
-    }
+    await _save();
+  }
+
+  Future<void> setOnlineSearch(bool value) async {
+    if (value == onlineSearch) return;
+    onlineSearch = value;
+    notifyListeners();
+    await _save();
   }
 
   Future<File> _file() async {

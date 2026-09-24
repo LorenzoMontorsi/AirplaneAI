@@ -2,10 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:llamadart/llamadart.dart';
+import '../l10n/app_language.dart';
 import '../l10n/app_strings.dart';
 import '../services/app_settings.dart';
 import '../services/chat_engine.dart';
 import '../services/model_manager.dart';
+import '../services/rss_news_service.dart';
 import '../widgets/message_bubble.dart';
 import 'settings_screen.dart';
 
@@ -38,6 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isGenerating = false;
   bool _isInitializing = true;
   bool _applyingLanguage = false;
+  AppLanguage? _lastLanguage;
   String _initLog = S.current.initializing;
   String? _pendingImagePath;
   bool _visionEnabled = false;
@@ -45,6 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _lastLanguage = AppSettings.instance.language;
     AppSettings.instance.addListener(_onLanguageChanged);
     _initEngine();
   }
@@ -61,6 +65,12 @@ class _ChatScreenState extends State<ChatScreen> {
   /// solo la chat. Italiano carica Gemma 3, e se i pesi non ci sono si torna
   /// al download.
   void _onLanguageChanged() {
+    // Il notify scatta anche per il toggle RSS: in quel caso basta ridisegnare.
+    if (AppSettings.instance.language == _lastLanguage) {
+      if (mounted) setState(() {});
+      return;
+    }
+    _lastLanguage = AppSettings.instance.language;
     _applyLanguageChange();
   }
 
@@ -173,10 +183,27 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() => _uiMessages.add(ChatMessageUI(text: '', role: BubbleRole.assistant)));
     _scrollToBottom();
 
-    final historyCopy = List<LlamaChatMessage>.from(_llamaHistory);
+    // Ricerca online facoltativa: contesto RSS delle ultime 24h, best-effort.
+    String? newsContext;
     String accumulated = '';
+    if (AppSettings.instance.onlineSearch && text.isNotEmpty) {
+      setState(() => _uiMessages[_uiMessages.length - 1] =
+          ChatMessageUI(text: S.current.searchingNews, role: BubbleRole.assistant));
+      newsContext = await RssNewsService.instance.buildContextBlock(
+          text, AppSettings.instance.language);
+      if (newsContext.isEmpty) {
+        setState(() => _uiMessages[_uiMessages.length - 1] =
+            ChatMessageUI(text: '', role: BubbleRole.assistant));
+      }
+    }
+
+    final historyCopy = List<LlamaChatMessage>.from(_llamaHistory);
     try {
-      final stream = _engine.chatStream(history: historyCopy, userText: text, imagePath: imgPath);
+      final stream = _engine.chatStream(
+          history: historyCopy,
+          userText: text,
+          imagePath: imgPath,
+          newsContext: newsContext);
       await for (final token in stream) {
         accumulated += token;
         setState(() => _uiMessages[_uiMessages.length - 1] = ChatMessageUI(text: accumulated, role: BubbleRole.assistant));
@@ -264,6 +291,23 @@ class _ChatScreenState extends State<ChatScreen> {
           Text(s.visionSubtitle(_visionEnabled), style: const TextStyle(fontSize: 11, color: Colors.white70)),
         ]),
         actions: [
+          IconButton(
+            icon: Icon(AppSettings.instance.onlineSearch
+                ? Icons.cloud_done
+                : Icons.cloud_off),
+            tooltip: AppSettings.instance.onlineSearch
+                ? s.onlineSearchOn
+                : s.onlineSearchOff,
+            onPressed: () {
+              final next = !AppSettings.instance.onlineSearch;
+              AppSettings.instance.setOnlineSearch(next);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(next ? s.onlineSearchOn : s.onlineSearchOff),
+                    duration: const Duration(seconds: 2)));
+              }
+            },
+          ),
           IconButton(icon: const Icon(Icons.delete_outline), tooltip: s.clearChat, onPressed: _clearChat),
           PopupMenuButton<String>(
             onSelected: (v) {

@@ -155,11 +155,12 @@ class ChatEngine {
     }
   }
 
-  /// Chat streaming: supporta testo + opzionale immagine
+  /// Chat streaming: supporta testo + opzionale immagine + opzionale contesto RSS.
   Stream<String> chatStream({
     required List<LlamaChatMessage> history,
     required String userText,
     String? imagePath,
+    String? newsContext,
     GenerationParams params = defaultParams,
   }) async* {
     if (_engine == null || !_isLoaded) {
@@ -176,9 +177,14 @@ class ChatEngine {
     }
     // Senza testo il modello descrive l'immagine nella sua lingua di default.
     final language = AppSettings.instance.language;
-    final promptText = userText.trim().isEmpty && content.isNotEmpty
+    var promptText = userText.trim().isEmpty && content.isNotEmpty
         ? imageOnlyPromptFor(language)
         : userText.trim();
+    // Contesto RSS facoltativo: solo se pertinente, il system prompt resta invariato.
+    final news = newsContext?.trim() ?? '';
+    if (news.isNotEmpty && promptText.isNotEmpty) {
+      promptText = '$promptText\n\n$news';
+    }
     if (promptText.isNotEmpty) {
       content.add(LlamaTextContent(promptText));
     }
@@ -223,8 +229,13 @@ class ChatEngine {
     required List<LlamaChatMessage> history,
     required String text,
     String? imagePath,
+    String? newsContext,
   }) {
-    return chatStream(history: history, userText: text, imagePath: imagePath);
+    return chatStream(
+        history: history,
+        userText: text,
+        imagePath: imagePath,
+        newsContext: newsContext);
   }
 
   Future<void> dispose() async {

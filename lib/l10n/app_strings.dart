@@ -489,4 +489,36 @@ class S {
         AppLanguage.en => 'Continue',
         AppLanguage.zh => '继续',
       };
+
+  String get onlineSearchTitle => switch (language) {
+        AppLanguage.it => 'Notizie online (RSS)',
+        AppLanguage.en => 'Online news (RSS)',
+        AppLanguage.zh => '在线新闻（RSS）',
+      };
+
+  String get onlineSearchHelp => switch (language) {
+        AppLanguage.it =>
+          'Facoltativo e spento di default. Se acceso, prima di rispondere cerca nel tuo feed FreshRSS delle ultime 24h e aggiunge le notizie pertinenti al prompt. Il modello resta sul telefono; se la rete manca, risponde offline come prima.',
+        AppLanguage.en =>
+          'Optional and off by default. When on, it searches your FreshRSS feed from the last 24h before answering and adds matching news to the prompt. The model stays on the phone; without network it answers offline as before.',
+        AppLanguage.zh => '可选，默认关闭。开启后会在回答前搜索你过去24小时的 FreshRSS 订阅，并把相关新闻加入提示。模型仍在手机上；没有网络时和以前一样离线回答。',
+      };
+
+  String get onlineSearchOn => switch (language) {
+        AppLanguage.it => 'Ricerca online attiva',
+        AppLanguage.en => 'Online search on',
+        AppLanguage.zh => '在线搜索已开启',
+      };
+
+  String get onlineSearchOff => switch (language) {
+        AppLanguage.it => 'Ricerca online spenta',
+        AppLanguage.en => 'Online search off',
+        AppLanguage.zh => '在线搜索已关闭',
+      };
+
+  String get searchingNews => switch (language) {
+        AppLanguage.it => 'Cerco nelle notizie recenti...',
+        AppLanguage.en => 'Searching recent news...',
+        AppLanguage.zh => '正在搜索最近的新闻...',
+      };
 }

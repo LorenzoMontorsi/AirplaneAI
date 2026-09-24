@@ -119,6 +119,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              const Icon(Icons.cloud_outlined, color: Color(0xFF0F7B6B)),
+              const SizedBox(width: 8),
+              Text(
+                s.onlineSearchTitle,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            s.onlineSearchHelp,
+            style: const TextStyle(fontSize: 13, height: 1.35, color: Colors.black54),
+          ),
+          const SizedBox(height: 12),
+          Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            clipBehavior: Clip.antiAlias,
+            child: SwitchListTile(
+              activeThumbColor: const Color(0xFF0F7B6B),
+              title: Text(
+                s.onlineSearchTitle,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(AppSettings.instance.onlineSearch
+                  ? s.onlineSearchOn
+                  : s.onlineSearchOff),
+              value: AppSettings.instance.onlineSearch,
+              onChanged: (value) =>
+                  AppSettings.instance.setOnlineSearch(value),
+            ),
+          ),
         ],
       ),
     );
